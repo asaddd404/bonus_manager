@@ -1,0 +1,25 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Logs
+*.log
+debug.log
+gunicorn.log
+
+# SQLite
+db.sqlite3
+
+# Django static & media
+static/
+staticfiles/
+
+# Virtual environments
+venv/
+.env
+
+# IDE configs
+*.idea/
+*.vscode/

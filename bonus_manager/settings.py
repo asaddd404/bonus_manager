@@ -80,8 +80,9 @@ USE_TZ = True
 
 # Статические файлы
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static']  # Если есть кастомные файлы
+STATIC_ROOT = BASE_DIR / 'static'
+
+# STATICFILES_DIRS = [BASE_DIR / 'static']  # Если есть кастомные файлы
 
 # Crispy Forms
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -94,8 +95,7 @@ LOGOUT_REDIRECT_URL = '/login/'
 AUTH_USER_MODEL = 'core.User'  # Проверь, что модель User определена в core/models.py
 
 # Логирование
-LOGGING = {
-    'version': 1,
+LOGGING = {    'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
         'file': {
