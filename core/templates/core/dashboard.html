@@ -29,15 +29,13 @@
   </style>
 </head>
 <body>
-  <div class="container  dashboard-container ">
+  <div class="container dashboard-container">
     <div class="d-flex justify-content-between align-items-center mb-4 bg-dark p-3 rounded text-white">
-      <h3> {{ business_name }}</h3>
-       <form method="post" action="{% url 'logout' %}">
-  {% csrf_token %}
-  <button type="submit" class="btn btn-primary">Выйти</button>
-        </form>
-
-
+      <h3>{{ business_name }}</h3>
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Выйти</button>
+      </form>
     </div>
 
     <!-- Статистика -->
@@ -50,7 +48,6 @@
           </div>
         </div>
       </div>
-    
     </div>
 
     <p class="mb-3">Потрачено бонусов за месяц: <strong>{{ spent }} ТГ</strong></p>
@@ -67,8 +64,43 @@
     </form>
 
     <div class="row">
-      <!-- Таблица клиентов -->
-      <div class="col-12 col-md-8 mb-4">
+      <!-- Добавить клиента -->
+      <div class="col-12 col-md-4 order-1">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <h5 class="card-title mb-3">Добавить клиента</h5>
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="add_client" value="1">
+              <div class="mb-3">
+                <label class="form-label">Имя клиента</label>
+                {{ add_form.name }}
+                {% if add_form.name.errors %}
+                  <div class="text-danger small">{{ add_form.name.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Телефон</label>
+                {{ add_form.phone }}
+                {% if add_form.phone.errors %}
+                  <div class="text-danger small">{{ add_form.phone.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Баланс бонусов</label>
+                {{ add_form.balance }}
+                {% if add_form.balance.errors %}
+                  <div class="text-danger small">{{ add_form.balance.errors }}</div>
+                {% endif %}
+              </div>
+              <button type="submit" class="btn btn-primary w-100">Добавить</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Список клиентов -->
+      <div class="col-12 col-md-8 order-2">
         <div class="card shadow-sm border-0">
           <div class="card-body">
             <h5 class="card-title mb-3">Список клиентов</h5>
@@ -122,41 +154,6 @@
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Добавить клиента -->
-      <div class="col-12 col-md-4">
-        <div class="card shadow-sm border-0">
-          <div class="card-body">
-            <h5 class="card-title mb-3">Добавить клиента</h5>
-            <form method="post">
-              {% csrf_token %}
-              <input type="hidden" name="add_client" value="1">
-              <div class="mb-3">
-                <label class="form-label">Имя клиента</label>
-                {{ add_form.name }}
-                {% if add_form.name.errors %}
-                  <div class="text-danger small">{{ add_form.name.errors }}</div>
-                {% endif %}
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Телефон</label>
-                {{ add_form.phone }}
-                {% if add_form.phone.errors %}
-                  <div class="text-danger small">{{ add_form.phone.errors }}</div>
-                {% endif %}
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Баланс бонусов</label>
-                {{ add_form.balance }}
-                {% if add_form.balance.errors %}
-                  <div class="text-danger small">{{ add_form.balance.errors }}</div>
-                {% endif %}
-              </div>
-              <button type="submit" class="btn btn-primary w-100">Добавить</button>
-            </form>
           </div>
         </div>
       </div>
@@ -221,15 +218,6 @@
       </div>
     </div>
   </div>
-{% if messages %}
-  <div class="mb-3">
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags }}">
-        {{ message }}
-      </div>
-    {% endfor %}
-  </div>
-{% endif %}
 
   <!-- History Modal -->
   <div class="modal fade" id="historyModal" tabindex="-1">
@@ -239,8 +227,7 @@
           <h5 class="modal-title">История бонусов</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body" id="historyContent">
-        </div>
+        <div class="modal-body" id="historyContent"></div>
       </div>
     </div>
   </div>
