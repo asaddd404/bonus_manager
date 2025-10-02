@@ -9,232 +9,160 @@
   <style>
     body {
       background-color: #f8f9fa;
-      overflow-x: hidden;
     }
     .dashboard-container {
-      padding: 15px;
-      max-width: 100%;
+      padding: 20px;
     }
-    .table-responsive {
-      margin-bottom: 20px;
-      overflow-x: auto;
+    .card {
+      border-radius: 15px;
     }
-    .table {
-      width: 100%;
-      table-layout: fixed;
-    }
-    .table th, .table td {
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      white-space: normal;
+    .table td, .table th {
       vertical-align: middle;
     }
-    .table th:nth-child(1), .table td:nth-child(1) { /* Имя */
-      width: 30%;
+    .badge {
+      font-size: 0.9rem;
+      padding: 0.5em 0.8em;
     }
-    .table th:nth-child(2), .table td:nth-child(2) { /* Телефон */
-      width: 30%;
-    }
-    .table th:nth-child(3), .table td:nth-child(3) { /* Действия */
-      width: 40%;
-    }
-    .action-btn {
-      padding: 6px 10px;
-      font-size: 0.85rem;
-    }
-    .dropdown-menu {
-      min-width: 120px;
-    }
-    .dropdown-item {
-      font-size: 0.85rem;
-      padding: 6px 10px;
-    }
-    @media (max-width: 768px) {
-      h2 {
-        font-size: 1.4rem;
-      }
-      .btn {
-        width: 100%;
-        margin-bottom: 10px;
-        padding: 10px;
-        font-size: 1rem;
-      }
-      .action-btn {
-        font-size: 0.8rem;
-        padding: 8px;
-      }
-      .form-control, .form-select {
-        font-size: 0.95rem;
-        padding: 8px;
-      }
-      .modal-dialog {
-        margin: 10px;
-        max-width: 95%;
-      }
-      .table th, .table td {
-        padding: 6px;
-        font-size: 0.85rem;
-      }
-      .action-buttons {
-        display: none !important;
-      }
-      .action-dropdown {
-        display: block;
-      }
-      .table th:nth-child(1), .table td:nth-child(1) { /* Имя */
-        width: 35%;
-      }
-      .table th:nth-child(2), .table td:nth-child(2) { /* Телефон */
-        width: 35%;
-      }
-      .table th:nth-child(3), .table td:nth-child(3) { /* Действия */
-        width: 30%;
-      }
-    }
-    @media (min-width: 769px) {
-      .action-dropdown {
-        display: none !important;
-      }
-      .action-buttons {
-        display: flex !important;
-      }
-    }
-    @media (max-width: 576px) {
-      .dashboard-container {
-        padding: 10px;
-      }
-      .table th, .table td {
-        padding: 5px;
-        font-size: 0.8rem;
-      }
-      .table th:nth-child(1), .table td:nth-child(1) { /* Имя */
-        width: 40%;
-      }
-      .table th:nth-child(2), .table td:nth-child(2) { /* Телефон */
-        width: 40%;
-      }
-      .table th:nth-child(3), .table td:nth-child(3) { /* Действия */
-        width: 20%;
-      }
+    .btn-sm {
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
-  <div class="container dashboard-container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h2>Панель менеджера: {{ business_name }}</h2>
-      <a href="{% url 'logout' %}" class="btn btn-secondary">Выйти</a>
+  <div class="container  dashboard-container ">
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-dark p-3 rounded text-white">
+      <h3> {{ business_name }}</h3>
+       <form method="post" action="{% url 'logout' %}">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-primary">Выйти</button>
+        </form>
+
+
     </div>
-    <p class="mb-3">Потрачено бонусов за месяц: {{ spent }} руб.</p>
-    <button type="button" class="btn btn-secondary mb-3" data-bs-toggle="modal" data-bs-target="#templateModal">Редактировать шаблоны</button>
+
+    <!-- Статистика -->
+    <div class="row mb-4">
+      <div class="col-12 col-md-6 mb-3">
+        <div class="card shadow-sm border-0">
+          <div class="card-body text-center">
+            <h6 class="text-muted">Всего клиентов</h6>
+            <h3>{{ clients.count }}</h3>
+          </div>
+        </div>
+      </div>
     
-    <form method="get" class="mb-3">
+    </div>
+
+    <p class="mb-3">Потрачено бонусов за месяц: <strong>{{ spent }} ТГ</strong></p>
+    <button type="button" class="btn btn-outline-primary mb-3" data-bs-toggle="modal" data-bs-target="#templateModal">
+      Редактировать шаблоны
+    </button>
+
+    <!-- Поиск -->
+    <form method="get" class="mb-4">
       <div class="input-group">
         <input type="text" class="form-control" name="search" value="{{ search_query }}" placeholder="Поиск по имени или номеру">
         <button class="btn btn-primary" type="submit">Поиск</button>
       </div>
     </form>
-    
+
     <div class="row">
+      <!-- Таблица клиентов -->
       <div class="col-12 col-md-8 mb-4">
-        <div class="table-responsive">
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Имя</th>
-                <th>Телефон</th>
-                <th>Действия</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for client in clients %}
-              <tr>
-                <td>{{ client.name }}</td>
-                <td>{{ client.phone }}</td>
-                <td>
-                  <!-- Кнопки для десктопа -->
-                  <div class="action-buttons d-flex flex-column flex-md-row gap-2">
-                    <button type="button" class="btn btn-primary action-btn" data-bs-toggle="modal" data-bs-target="#historyModal" onclick="loadHistory({{ client.id }})">История</button>
-                    <button type="button" class="btn btn-primary action-btn" data-bs-toggle="modal" data-bs-target="#bonusModal" data-client-id="{{ client.id }}">Бонус</button>
-                    <form method="post" class="d-inline">
-                      {% csrf_token %}
-                      <input type="hidden" name="client_id" value="{{ client.id }}">
-                      <button type="submit" name="reset_balance" class="btn btn-danger action-btn" onclick="return confirm('Вы уверены?')">Обнулить</button>
-                    </form>
-                    <form method="post" class="d-inline">
-                      {% csrf_token %}
-                      <input type="hidden" name="client_id" value="{{ client.id }}">
-                      <button type="submit" name="delete_client" class="btn btn-danger action-btn" onclick="return confirm('Вы уверены?')">Удалить</button>
-                    </form>
-                  </div>
-                  <!-- Выпадающее меню для мобильных и планшетов -->
-                  <div class="action-dropdown dropdown">
-                    <button class="btn btn-outline-secondary action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      <span>⋮</span>
-                    </button>
-                    <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#historyModal" onclick="loadHistory({{ client.id }})">История</a></li>
-                      <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#bonusModal" data-client-id="{{ client.id }}">Бонус</a></li>
-                      <li>
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <h5 class="card-title mb-3">Список клиентов</h5>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Имя</th>
+                    <th>Телефон</th>
+                    <th>Баланс</th>
+                    <th>Действия</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for client in clients %}
+                  <tr>
+                    <td><strong>{{ client.name }}</strong></td>
+                    <td>{{ client.phone }}</td>
+                    <td>
+                      {% if client.balance > 0 %}
+                        <span class="badge bg-success">{{ client.balance }} ТГ</span>
+                      {% elif client.balance == 0 %}
+                        <span class="badge bg-secondary">0 ТГ</span>
+                      {% else %}
+                        <span class="badge bg-danger">{{ client.balance }} ТГ</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#historyModal" onclick="loadHistory({{ client.id }})">История</button>
+                        <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#bonusModal" data-client-id="{{ client.id }}">Бонус</button>
                         <form method="post" class="d-inline">
                           {% csrf_token %}
                           <input type="hidden" name="client_id" value="{{ client.id }}">
-                          <button type="submit" name="reset_balance" class="dropdown-item text-danger" onclick="return confirm('Вы уверены?')">Обнулить</button>
+                          <button type="submit" name="reset_balance" class="btn btn-sm btn-outline-warning" onclick="return confirm('Вы уверены?')">Обнулить</button>
                         </form>
-                      </li>
-                      <li>
                         <form method="post" class="d-inline">
                           {% csrf_token %}
                           <input type="hidden" name="client_id" value="{{ client.id }}">
-                          <button type="submit" name="delete_client" class="dropdown-item text-danger" onclick="return confirm('Вы уверены?')">Удалить</button>
+                          <button type="submit" name="delete_client" class="btn btn-sm btn-outline-danger" onclick="return confirm('Удалить клиента?')">Удалить</button>
                         </form>
-                      </li>
-                    </ul>
-                  </div>
-                </td>
-              </tr>
-              {% endfor %}
-              {% if not clients %}
-                <tr>
-                  <td colspan="3" class="text-center">Клиентов пока нет</td>
-                </tr>
-              {% endif %}
-            </tbody>
-          </table>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                  {% if not clients %}
+                  <tr>
+                    <td colspan="4" class="text-center text-muted">Клиентов пока нет</td>
+                  </tr>
+                  {% endif %}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
+
+      <!-- Добавить клиента -->
       <div class="col-12 col-md-4">
-        <h4 class="mb-3">Добавить клиента</h4>
-        <form method="post">
-          {% csrf_token %}
-          <input type="hidden" name="add_client" value="1">
-          <div class="mb-3">
-            <label for="{{ add_form.name.id_for_label }}" class="form-label">Имя клиента</label>
-            <input type="text" name="{{ add_form.name.name }}" id="{{ add_form.name.id_for_label }}" class="form-control" value="{{ add_form.name.value|default_if_none:'' }}" required>
-            {% if add_form.name.errors %}
-              <div class="text-danger">{{ add_form.name.errors }}</div>
-            {% endif %}
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <h5 class="card-title mb-3">Добавить клиента</h5>
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="add_client" value="1">
+              <div class="mb-3">
+                <label class="form-label">Имя клиента</label>
+                {{ add_form.name }}
+                {% if add_form.name.errors %}
+                  <div class="text-danger small">{{ add_form.name.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Телефон</label>
+                {{ add_form.phone }}
+                {% if add_form.phone.errors %}
+                  <div class="text-danger small">{{ add_form.phone.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Баланс бонусов</label>
+                {{ add_form.balance }}
+                {% if add_form.balance.errors %}
+                  <div class="text-danger small">{{ add_form.balance.errors }}</div>
+                {% endif %}
+              </div>
+              <button type="submit" class="btn btn-primary w-100">Добавить</button>
+            </form>
           </div>
-          <div class="mb-3">
-            <label for="{{ add_form.phone.id_for_label }}" class="form-label">Номер телефона</label>
-            <input type="text" name="{{ add_form.phone.name }}" id="{{ add_form.phone.id_for_label }}" class="form-control" value="{{ add_form.phone.value|default_if_none:'' }}" data-inputmask="'mask': '+7(999)-999-99-99'" required>
-            {% if add_form.phone.errors %}
-              <div class="text-danger">{{ add_form.phone.errors }}</div>
-            {% endif %}
-          </div>
-          <div class="mb-3">
-            <label for="{{ add_form.balance.id_for_label }}" class="form-label">Баланс бонусов</label>
-            <input type="number" step="0.01" name="{{ add_form.balance.name }}" id="{{ add_form.balance.id_for_label }}" class="form-control" value="{{ add_form.balance.value|default_if_none:'0' }}" required>
-            {% if add_form.balance.errors %}
-              <div class="text-danger">{{ add_form.balance.errors }}</div>
-            {% endif %}
-          </div>
-          <button type="submit" class="btn btn-primary">Добавить</button>
-        </form>
+        </div>
       </div>
     </div>
   </div>
-  
+
   <!-- Template Modal -->
   <div class="modal fade" id="templateModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -248,16 +176,16 @@
             {% csrf_token %}
             <input type="hidden" name="edit_templates" value="1">
             <div class="mb-3">
-              <label for="{{ template_form.accrual_template.id_for_label }}">Шаблон для начисления</label>
-              <textarea name="{{ template_form.accrual_template.name }}" id="{{ template_form.accrual_template.id_for_label }}" class="form-control" rows="3">{{ template_form.accrual_template.value|default_if_none:'' }}</textarea>
+              <label>Шаблон для начисления</label>
+              {{ template_form.accrual_template }}
             </div>
             <div class="mb-3">
-              <label for="{{ template_form.deduction_template.id_for_label }}">Шаблон для списания</label>
-              <textarea name="{{ template_form.deduction_template.name }}" id="{{ template_form.deduction_template.id_for_label }}" class="form-control" rows="3">{{ template_form.deduction_template.value|default_if_none:'' }}</textarea>
+              <label>Шаблон для списания</label>
+              {{ template_form.deduction_template }}
             </div>
             <div class="mb-3">
-              <label for="{{ template_form.reset_template.id_for_label }}">Шаблон для обнуления</label>
-              <textarea name="{{ template_form.reset_template.name }}" id="{{ template_form.reset_template.id_for_label }}" class="form-control" rows="3">{{ template_form.reset_template.value|default_if_none:'' }}</textarea>
+              <label>Шаблон для обнуления</label>
+              {{ template_form.reset_template }}
             </div>
             <button type="submit" class="btn btn-primary">Сохранить</button>
           </form>
@@ -265,7 +193,7 @@
       </div>
     </div>
   </div>
-  
+
   <!-- Bonus Modal -->
   <div class="modal fade" id="bonusModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -280,27 +208,29 @@
             <input type="hidden" name="add_bonus" value="1">
             <input type="hidden" name="client_id" id="clientId">
             <div class="mb-3">
-              <label for="{{ bonus_form.amount.id_for_label }}">Сумма бонуса</label>
-              <input type="number" step="0.01" name="{{ bonus_form.amount.name }}" id="{{ bonus_form.amount.id_for_label }}" class="form-control" value="{{ bonus_form.amount.value|default_if_none:'' }}" required>
-              {% if bonus_form.amount.errors %}
-                <div class="text-danger">{{ bonus_form.amount.errors }}</div>
-              {% endif %}
+              <label>Сумма бонуса</label>
+              {{ bonus_form.amount }}
             </div>
             <div class="mb-3">
-              <label for="{{ bonus_form.type.id_for_label }}">Тип</label>
-              <select name="{{ bonus_form.type.name }}" id="{{ bonus_form.type.id_for_label }}" class="form-select">
-                {% for value, label in bonus_form.type.field.choices %}
-                  <option value="{{ value }}" {% if value == bonus_form.type.value %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
-              </select>
+              <label>Тип</label>
+              {{ bonus_form.type }}
             </div>
-            <button type="submit" class="btn btn-primary">Отправить</button>
+            <button type="submit" class="btn btn-primary w-100">Отправить</button>
           </form>
         </div>
       </div>
     </div>
   </div>
-  
+{% if messages %}
+  <div class="mb-3">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
   <!-- History Modal -->
   <div class="modal fade" id="historyModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
@@ -314,7 +244,7 @@
       </div>
     </div>
   </div>
-  
+
   <!-- WhatsApp Modal -->
   {% if wa_url %}
   <div class="modal fade" id="waModal" tabindex="-1">
@@ -326,58 +256,39 @@
         </div>
         <div class="modal-body">
           <textarea class="form-control mb-3" id="waMessage">{{ wa_message }}</textarea>
-          <a href="{{ wa_url }}" target="_blank" class="btn btn-primary">Отправить в WhatsApp</a>
+          <a href="{{ wa_url }}" target="_blank" class="btn btn-success w-100">Отправить в WhatsApp</a>
         </div>
       </div>
     </div>
   </div>
   {% endif %}
-  
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     Inputmask().mask(document.querySelectorAll('[data-inputmask]'));
-    
-    var bonusModal = document.getElementById('bonusModal')
+
+    var bonusModal = document.getElementById('bonusModal');
     bonusModal.addEventListener('show.bs.modal', function (event) {
-      var button = event.relatedTarget
-      var clientId = button.getAttribute('data-client-id')
-      document.getElementById('clientId').value = clientId
-    })
-    
+      var button = event.relatedTarget;
+      var clientId = button.getAttribute('data-client-id');
+      document.getElementById('clientId').value = clientId;
+    });
+
     function loadHistory(clientId) {
       fetch('/history/' + clientId + '/')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Клиент не найден');
-          }
-          return response.text();
-        })
+        .then(response => response.text())
         .then(html => {
           document.getElementById('historyContent').innerHTML = html;
         })
         .catch(error => {
-          document.getElementById('historyContent').innerHTML = '<p class="text-danger">Ошибка: ' + error.message + '</p>';
+          document.getElementById('historyContent').innerHTML = '<p class="text-danger">Ошибка загрузки истории</p>';
         });
     }
-    
+
     {% if wa_url %}
     var waModal = new bootstrap.Modal(document.getElementById('waModal'), {});
     waModal.show();
     {% endif %}
-    
-    // Поддержка открытия модальных окон из выпадающего меню
-    document.querySelectorAll('.dropdown-item[data-bs-toggle="modal"]').forEach(item => {
-      item.addEventListener('click', function (event) {
-        event.preventDefault();
-        var targetModal = document.querySelector(this.getAttribute('data-bs-target'));
-        var clientId = this.getAttribute('data-client-id');
-        if (clientId) {
-          document.getElementById('clientId').value = clientId;
-        }
-        var modal = new bootstrap.Modal(targetModal);
-        modal.show();
-      });
-    });
   </script>
 </body>
 </html>
