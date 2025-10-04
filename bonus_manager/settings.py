@@ -10,7 +10,7 @@ SECRET_KEY = '6=z!9v1q2tr($yk*^)-8w=da@7w7az+o2uto8@wx(v@tpc%y$k'  # python -c '
 DEBUG = False
 
 # Разрешённые хосты
-ALLOWED_HOSTS = ['109.235.119.125', 'bonus.inbrain.kz', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['109.235.119.125', 'cash.inbrain.kz','bonus.inbrain.kz', 'localhost', '127.0.0.1']
 
 # Установленные приложения
 INSTALLED_APPS = [
